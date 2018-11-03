@@ -1,0 +1,15 @@
+#lang racket
+#lang slideshow
+
+
+;(struct grafo (lista-arestas no-atual))
+
+(define aresta
+  (lambda (label origem destino)))
+
+(define lista-arestas
+  (lambda ( (list 1  2 3)(list 3 3 3) )))
+
+
+
+              

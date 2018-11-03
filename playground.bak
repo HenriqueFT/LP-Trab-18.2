@@ -1,0 +1,37 @@
+#lang racket
+
+
+;(struct grafo (lista-arestas no-atual))
+
+;(define aresta (bola origem destino))
+
+;(define add-lists
+;  (lambda (list1 list2)
+;    (list (define add-firsts
+;            (lambda (+ list1
+
+(define a '(1 2 3 4 5))
+
+(define b '(10 10 10 10 10))
+
+(define add-firsts
+  (lambda (lista1 lista2)
+    (+ (car lista1) (car lista2))))
+
+(define add-lasts
+  (lambda (lista1 lista2)
+    (+ (cdr lista1) (cdr lista2))))
+
+(define tempL '())
+
+(define addL
+  (lambda (tempL list1 list2)
+    (if (or (null? list1) (null? list2))
+        tempL
+        (let ([newTemp (append tempL (list (add-firsts list1 list2)))])
+              (addL newTemp (cdr list1) (cdr list2))))))
+
+
+
+
+             
