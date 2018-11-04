@@ -75,14 +75,53 @@
       )
     )
   )
-  
 
-(define stringP "( a ; b ( c U d ) )") 
+;SET! PARA ATUALIZAR VALORES
+(define tm
+  (lambda (test bola)
+    (begin 
+      (set! test (- test 1))
+      (set! bola (+ bola 7))
+      (print (list test bola))
+      )
+    )
+  )
+
+
+(define stringP " ( a ; b ( c U d ) ) ") 
 (define listaP (st-to-sy stringP))
 
 
+;Um contador que quando ve um "(" adiciona quando ve um ")" diminui,quando chega em 0 ele faz a FUNCAO com o q tinha la dentro
 
+(define parenteses
+  (lambda (list-sym FUNC)
+    (writeln "COMECO FUNCAO")
+    (writeln list-sym)
+    (let ([counter 0]
+          [buffer '()])
+          (map (lambda (s-atual)
+                 (cond
+                   [(symbol=? s-atual '|(| )
+                    (set! counter (+ counter 1))]
+                   [(symbol=? s-atual '|)| )
+                    (set! counter (- counter 1))
+                    (if (zero? counter)
+                        (FUNC buffer)
+                        (void) )]
+                   [else (set! buffer (append buffer (list s-atual)))
+                         (writeln "VO IMPRIMIR A  LISTA")
+                         (writeln buffer)
+                         ])
+                 )
+               list-sym)
+      )   
+    )
+  )
 
+(define rec
+  (lambda (a)
+    (parenteses a rec)))
 
 
 
