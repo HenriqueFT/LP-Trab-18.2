@@ -103,16 +103,21 @@
           (map (lambda (s-atual)
                  (cond
                    [(symbol=? s-atual '|(| )
-                    (set! counter (+ counter 1))]
+                    (if (positive? counter) ;em ambos os casos (ser >0 ou nao) iremos incrementar
+                        (set! buffer (append buffer (list s-atual)))
+                        (void))
+                    (set! counter (+ counter 1))
+                    ]
                    [(symbol=? s-atual '|)| )
                     (set! counter (- counter 1))
-                    (if (zero? counter)
-                        (FUNC buffer)
-                        (void) )]
+                    (writeln counter)
+                    (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirodum ( antes, a nao  ser que apenas nao tenha
+                        (set! buffer (append buffer (list s-atual)))
+                        (FUNC buffer))]
                    [else (set! buffer (append buffer (list s-atual)))
-                         (writeln "VO IMPRIMIR A  LISTA")
-                         (writeln buffer)
-                         ])
+                         (writeln "VO PRINTAR O BUFFER")
+                         (writeln buffer)]
+                   )
                  )
                list-sym)
       )   
