@@ -75,7 +75,7 @@ lidando com ;
     (if (null? validos)
         (#f)
         (map (lambda (valid)
-               (pont-virg(temp-grafo tail)))
+               (pont-virg (grafo (grafo-lista-arestas graf)(second valid)) tail))
               validos)
         )
     )
