@@ -56,6 +56,7 @@
     )
   )
 
+
 ;as 10:37 descubro que tem algo que  faz um procedimento para cada membro de uma lista...cool
 (define addL-elegante
   (lambda (list1 list2)
@@ -65,10 +66,23 @@
     )
   )
 
+(define st-to-sy  ;String to symbol-List
+  (lambda (string)
+    (let([split (string-split string)])
+      (map (lambda (atual)
+             (string->symbol atual))
+           split)
+      )
+    )
+  )
   
-               
-   
+
+(define stringP "( a ; b ( c U d ) )") 
+(define listaP (st-to-sy stringP))
 
 
 
-             
+
+
+
+
