@@ -1,16 +1,17 @@
 #lang racket
 
 
-#|
-(define build-grafo
-  (lambda (entrada)
-    (grafo ((map (lambda (atual)
-           (aresta (list-ref atual 0)(list-ref atual 1)(list-ref atual 2)))
-         (list-ref entrada 0)))
-      (list-ref entrada 1))))
-|#
+(define st-to-sy  ;String to symbol-List
+  (lambda (string)
+    (let([split (string-split string)])
+      (map (lambda (atual)
+             (string->symbol atual))
+           split)
+      )
+    )
+  )
+    
 
-;(struct aresta (ori des label))
 
 (struct grafo (lista-arestas no-atual))
 
@@ -18,14 +19,17 @@
 ;Assim ta definidopelomenos  um grafo que podemos usar como testes
 ;(define entrada (list (list (list 'A 'B 'a) (list 'A 'C 'b) (list 'C 'D 'c)) 'A))
 
-(define entrada (list (list "A B a"  "A C b" "C D c") 'A))
+(define entrada (list (list "A B a"  "B C b" "C A c") 'A))
 
          
 ;aqui to usando string simplesmente pq permite ; mas podemos usar listas e  usar outro  simbolo para  fazer o ; 
-(define pdl-teste1 "( a ; b ) ; c")
+(define pdl-teste1 "a ; b ; c")
 (define pdl-teste2 "( a U b ) ; c")
 (define pdl-teste3 "( a ) *")
 
+(define t1 (st-to-sy pdl-teste1))
+(define t2 (st-to-sy pdl-teste2))
+(define t3 (st-to-sy pdl-teste3)) 
 
 (define build-grafo
   (lambda (entrada)
@@ -35,8 +39,7 @@
            (second entrada))))
 
 
-
-
+(define e-grafo (build-grafo entrada))
 
 #|
 (a;b)Uc
@@ -55,24 +58,29 @@ lidando com ;
 |#
 
 
-(define st-to-sy  ;String to symbol-List
-  (lambda (string)
-    (let([split (string-split string)])
-      (map (lambda (atual)
-             (string->symbol atual))
-           split)
-      )
-    )
-  )
-    
 
 ;Temos que definir quais seram o PASSOS para resolver nosso problema, para ai conseguirmos quebrar ele em pedacos menores
 
 (define caminhos-validos
-  (lambda (origem label lista-arestas)
+  (lambda (origem lista-arestas label)
     (filter (lambda (aresta)
               (and (symbol=? (first aresta) origem) (symbol=? (third aresta) label))) 
               lista-arestas)))
+
+(define pont-virg ;Assume que seja um atomico e um ; em seguida
+  (lambda (graf comando)
+    (define label-holder (first comando))
+    (define tail (list-tail comando 2))
+    (define validos (caminhos-validos (grafo-no-atual graf)(grafo-lista-arestas graf)label-holder))
+    (if (null? validos)
+        (#f)
+        (map (lambda (valid)
+               (pont-virg(temp-grafo tail)))
+              validos)
+        )
+    )
+  )
+    
 
 
              

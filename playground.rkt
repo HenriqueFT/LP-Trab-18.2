@@ -96,7 +96,7 @@
 
 (define parenteses
   (lambda (list-sym FUNC)
-    (writeln "COMECO FUNCAO")
+    (writeln "COMECO FUNCAO Parenteses em:")
     (writeln list-sym)
     (let ([counter 0]
           [buffer '()])
@@ -114,9 +114,7 @@
                     (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirodum ( antes, a nao  ser que apenas nao tenha
                         (set! buffer (append buffer (list s-atual)))
                         (FUNC buffer))]
-                   [else (set! buffer (append buffer (list s-atual)))
-                         (writeln "VO PRINTAR O BUFFER")
-                         (writeln buffer)]
+                   [else (set! buffer (append buffer (list s-atual)))]
                    )
                  )
                list-sym)
