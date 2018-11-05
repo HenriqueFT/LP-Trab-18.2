@@ -52,6 +52,14 @@
     )
   )
 
+(define extrair-ex; retorna uma lista que a primeira  posicao eh uma lista normal qeu seria retornada em extrair e tambema posicao de ")"
+  (lambda (list-sym)
+    (define resp (filter not-void? (part1-e-p list-sym)))
+    (define position (- (list-ref (car resp) 1) 1)) ;;soma 1 amaispor  isso tenho que colocar essa loucura
+    (list (caar resp) position)
+    )
+  )
+
 
 
 (struct grafo (lista-arestas no-atual))

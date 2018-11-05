@@ -144,25 +144,32 @@
     )
   )
 
-(define part-extrair-parenteses
+(define part1-e-p
   (lambda (list-sym)
     (let ([counter 0]
-          [buffer '()])
+          [buffer '()]
+          [parentese-pos 0])
           (map (lambda (s-atual)
                  (cond
                    [(symbol=? s-atual '|(| )
                     (if (positive? counter) ;em ambos os casos (ser >0 ou nao) iremos incrementar
                         (begin
                           (set! buffer (append buffer (list s-atual)))
-                          (set! counter (+ counter 1)))
-                        (set! counter (+ counter 1)))
-                    ]
+                          (set! counter (+ counter 1))
+                          (set! parentese-pos (+ parentese-pos 1)))
+                        (begin
+                         (set! counter (+ counter 1))
+                         (set! parentese-pos (+ parentese-pos 1)))
+                        )]
                    [(symbol=? s-atual '|)| )
                     (set! counter (- counter 1))
+                    (set! parentese-pos (+ parentese-pos 1))
                     (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirodum ( antes, a nao  ser que apenas nao tenha
                         (set! buffer (append buffer (list s-atual)))
-                       buffer)]
-                   [else (set! buffer (append buffer (list s-atual)))]
+                        (list buffer parentese-pos))]
+                   [else (begin
+                           (set! parentese-pos (+ parentese-pos 1))
+                           (set! buffer (append buffer (list s-atual))))]
                    )
                  )
                list-sym)
@@ -172,6 +179,17 @@
 
 (define extrair;extrair parenteses | Sim precisa das operacoes abaixo para ficar uma lista bonitinha
   (lambda (list-sym)
-     (car(filter not-void? ( part-extrair-parenteses list-sym)))
+     (define resp (filter not-void? (part1-e-p list-sym)))
+    (define position (- (list-ref (car resp) 1) 1))
+    (list (caar resp) position)
     )
   )
+
+
+
+(define temp-list (member '|)| sec-list))
+
+
+
+(define goo (list-ref sec-list (list-ref (extrair sec-list) 1)))
+
