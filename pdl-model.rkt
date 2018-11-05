@@ -54,13 +54,19 @@ lidando com ;
 (if (funcao (grafo "a"))
     (funcao (grafo <tudo depois do ";">))
     #\f))
+|#
 
+
+#|
+<sub-string>U<Substring> ; <TAIL>
+FUNC  <TAIL> <Ponto-esquerda>
+FUNC  <TAIL> <Ponto-direita>
+Executa U  (substring-esquerda substring-direita tail grafo)
 |#
 
 
 
 ;Temos que definir quais seram o PASSOS para resolver nosso problema, para ai conseguirmos quebrar ele em pedacos menores
-
 (define caminhos-validos
   (lambda (origem lista-arestas label)
     (filter (lambda (aresta)
@@ -68,19 +74,18 @@ lidando com ;
               lista-arestas)))
 
 (define pont-virg ;Assume que seja um atomico e um ; em seguida
-  (lambda (graf comando)
+  (lambda (graf comando FUNC)
     (define label-holder (first comando))
     (define tail (list-tail comando 2))
     (define validos (caminhos-validos (grafo-no-atual graf)(grafo-lista-arestas graf)label-holder))
     (if (null? validos)
         (#f)
         (map (lambda (valid)
-               (pont-virg (grafo (grafo-lista-arestas graf)(second valid)) tail))
+               (FUNC (grafo (grafo-lista-arestas graf)(second valid)) tail))
               validos)
         )
     )
   )
-    
 
 
              
