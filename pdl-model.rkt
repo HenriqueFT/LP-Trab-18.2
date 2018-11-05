@@ -1,5 +1,6 @@
 #lang racket
 
+;------------------------------------------------Aqui em cima colocaremos funcoes de apoio a resolucao--------------------------------------------
 
 (define st-to-sy  ;String to symbol-List
   (lambda (string)
@@ -10,7 +11,47 @@
       )
     )
   )
-    
+
+ (define not-void?;umaprocedure que faz  o oposto de void? , feita na necessidade de filtrarmos voids
+  (lambda (any)
+    (if (void? any)
+        #f
+        #t)
+    )
+  )
+
+(define part-extrair-parenteses; parte principal de  extracao de parenteses,porem retorna varios #voids dentro | Nao eficiente
+  (lambda (list-sym)
+    (let ([counter 0]
+          [buffer '()])
+          (map (lambda (s-atual)
+                 (cond
+                   [(symbol=? s-atual '|(| )
+                    (if (positive? counter) ;em ambos os casos (ser >0 ou nao) iremos incrementar
+                        (begin
+                          (set! buffer (append buffer (list s-atual)))
+                          (set! counter (+ counter 1)))
+                        (set! counter (+ counter 1)))
+                    ]
+                   [(symbol=? s-atual '|)| )
+                    (set! counter (- counter 1))
+                    (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirodum ( antes, a nao  ser que apenas nao tenha
+                        (set! buffer (append buffer (list s-atual)))
+                       buffer)]
+                   [else (set! buffer (append buffer (list s-atual)))]
+                   )
+                 )
+               list-sym)
+      )   
+    )
+  )
+
+(define extrair;extrair parenteses | Sim precisa das operacoes abaixo para ficar uma lista bonitinha
+  (lambda (list-sym)
+     (car(filter not-void? (part-extrair-parenteses list-sym)))
+    )
+  )
+
 
 
 (struct grafo (lista-arestas no-atual))
@@ -86,6 +127,8 @@ Executa U  (substring-esquerda substring-direita tail grafo)
         )
     )
   )
+
+
 
 
              

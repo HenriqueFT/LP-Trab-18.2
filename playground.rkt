@@ -94,6 +94,7 @@
 
 ;Um contador que quando ve um "(" adiciona quando ve um ")" diminui,quando chega em 0 ele faz a FUNCAO com o q tinha la dentro
 
+
 (define parenteses
   (lambda (list-sym FUNC)
     (writeln "COMECO FUNCAO Parenteses em:")
@@ -104,9 +105,10 @@
                  (cond
                    [(symbol=? s-atual '|(| )
                     (if (positive? counter) ;em ambos os casos (ser >0 ou nao) iremos incrementar
-                        (set! buffer (append buffer (list s-atual)))
-                        (void))
-                    (set! counter (+ counter 1))
+                        (begin
+                          (set! buffer (append buffer (list s-atual)))
+                          (set! counter (+ counter 1)))
+                        (set! counter (+ counter 1)))
                     ]
                    [(symbol=? s-atual '|)| )
                     (set! counter (- counter 1))
@@ -122,9 +124,54 @@
     )
   )
 
-(define rec
-  (lambda (a)
-    (parenteses a rec)))
+
+(define sec-list (list  '|(| 'a  '|;| 'b '|)| '|;| 'c ))
+
+(define second?
+  (lambda (list)
+    (if (null? (cdr list))
+        #f
+        (list-tail list 1))
+    )
+  )
 
 
+(define not-void?;umaprocedure que faz  o oposto de
+  (lambda (any)
+    (if (void? any)
+        #f
+        #t)
+    )
+  )
 
+(define part-extrair-parenteses
+  (lambda (list-sym)
+    (let ([counter 0]
+          [buffer '()])
+          (map (lambda (s-atual)
+                 (cond
+                   [(symbol=? s-atual '|(| )
+                    (if (positive? counter) ;em ambos os casos (ser >0 ou nao) iremos incrementar
+                        (begin
+                          (set! buffer (append buffer (list s-atual)))
+                          (set! counter (+ counter 1)))
+                        (set! counter (+ counter 1)))
+                    ]
+                   [(symbol=? s-atual '|)| )
+                    (set! counter (- counter 1))
+                    (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirodum ( antes, a nao  ser que apenas nao tenha
+                        (set! buffer (append buffer (list s-atual)))
+                       buffer)]
+                   [else (set! buffer (append buffer (list s-atual)))]
+                   )
+                 )
+               list-sym)
+      )   
+    )
+  )
+
+(define extrair;extrair parenteses | Sim precisa das operacoes abaixo para ficar uma lista bonitinha
+  (lambda (list-sym)
+     (car(filter not-void? ( part-extrair-parenteses list-sym)))
+    )
+  )
