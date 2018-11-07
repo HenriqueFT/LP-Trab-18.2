@@ -265,3 +265,10 @@
   )
 
 (define vlist (list (vector 1 22 1) (vector 3 42 1)))
+
+
+
+(define vazia (list a))
+
+
+

@@ -23,6 +23,9 @@
 
 ;------------------------------------------------Aqui em cima colocaremos funcoes de apoio a resolucao--------------------------------------------
 
+
+(struct grafo (vetor-arestas no-atual))
+
 (define st-to-sy  ;String to symbol-List
   (lambda (string)
     (let* ([split (string-split string)]
@@ -84,8 +87,6 @@
 
 
 
-(struct grafo (vetor-arestas no-atual))
-
 ;note que essa eh uma  lsita  dearestas,nao tivemos que definir nada,pq nao precisa ter um OBJETO
 ;Assim ta definidopelomenos  um grafo que podemos usar como testes
 ;(define entrada (list (list (list 'A 'B 'a) (list 'A 'C 'b) (list 'C 'D 'c)) 'A))
@@ -145,7 +146,7 @@
     (define resp #f)
     (define validos (caminhos-validos (grafo-no-atual graf) (grafo-vetor-arestas graf) label)) ;; isso eh um vector
     (vector-map (lambda (valid)
-                  (if(FUNC tail) ;irah testar a label ,andar no grafo eseguir em frente para cada caminho possivel
+                  (if(FUNC (grafo (grafo-vetor-arestas graf)(vector-ref valid 2)) tail '()) ;irah testar a label ,andar no grafo eseguir em frente para cada caminho possivel
                      (begin
                        (set! resp #t)
                        (vector-set! valid 3 #t)) ;se tiver tudo certo aqui,isso marcarah as arestas passadas
@@ -159,7 +160,7 @@
      resp)  ;valor de fato retornado #f ou #t
   )
   
-;(grafo (grafo-vetor-arestas graf)(vector-ref valid 2)) tail '()
+;
 ;Checarah quais arestas nao foram percorridas no grafo (DEVERAHSER POSTA DEPOIS DE TODA EXECUCAO  DE FUNC)
 (define nao-percorridas
   (lambda (graf)
