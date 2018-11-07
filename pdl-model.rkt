@@ -60,14 +60,14 @@
                 ]
                [(symbol=? s-atual '|)| )
                 (set! counter (- counter 1))
-                (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirodum ( antes, a nao  ser que apenas nao tenha
+                (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirado um ( antes, a nao  ser que apenas nao tenha
                     (set! buffer (append buffer (list s-atual)))
                     buffer)]
                [else (set! buffer (append buffer (list s-atual)))]
                )
              )
            list-sym)
-      )   
+      )
     )
   )
 
@@ -80,8 +80,8 @@
 (define extrair-ex; retorna uma lista que a primeira  posicao eh uma lista normal qeu seria retornada em extrair e tambema posicao de ")"
   (lambda (list-sym)
     (define resp (filter not-void? (part-extrair-parenteses list-sym)))
-    (define position (- (list-ref (car resp) 1) 1)) ;;soma 1 amaispor  isso tenho que colocar essa loucura
-    (list (caar resp) position)
+    (define position (+ (length (car resp)) 1)) ;;soma 1 a maispor  isso tenho que colocar essa loucura
+    (list (car resp) position)
     )
   )
 
@@ -180,3 +180,4 @@
     resp
     )
   )
+
