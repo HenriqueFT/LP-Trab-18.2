@@ -82,10 +82,19 @@
 
 (define build-grafo
   (lambda (entrada)
-    (grafo (map (lambda (atual)
-                  (st-to-sy atual))
-                (first entrada))
-           (second entrada))))
+    (define arestas (map (lambda (atual)
+                          (st-to-sy atual))
+                        (first entrada))
+      )
+    (define arestas-com-booleana (map (lambda (atual) ; essa parte deve ser tirada caso nao utilizemos booleanas para  arestas percorridas
+                                        (append atual (list #f))
+                                        )
+                                      arestas)
+      )
+    (define graf-resp (grafo arestas-com-booleana (second entrada)));no caso de nao ter booleana coloque graf aqui
+    graf-resp
+    )
+  )
 
 
 (define e-grafo (build-grafo entrada))
@@ -125,7 +134,9 @@
     (define validos (caminhos-validos (grafo-no-atual graf)(grafo-lista-arestas graf)label))
     (map (lambda (valid)
                (if(FUNC (grafo (grafo-lista-arestas graf)(second valid)) tail '()) ;irah testar a label ,andar no grafo eseguir em frente para cada caminho possivel
-                  (set! resp #t)
+                  (begin
+                    (set! resp #t)
+                    (list-set valid 3 #t)) ;se tiver tudo certo aqui,isso marcarah as arestas passadas
                   (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
                            "Algo deu errado aqui: ~a , no ponto : ~a "
                            valid
@@ -136,4 +147,23 @@
     resp  ;valor de fato retornado #f ou #t
   )
 )
-             
+
+;Checarah quais arestas nao foram percorridas no grafo (DEVERAHSER POSTA DEPOIS DE TODA EXECUCAO  DE FUNC)
+(define nao-percorridas
+  (lambda (graf)
+    (define resp #t)
+    (define caminhos (grafo-lista-arestas graf))
+    (map (lambda (atual)
+           (if (last atual)
+               (- 1 1) ;se tiver #t nao faz nada
+               (begin
+                 (set! resp #f);se tiver uma falsa retorna falsa. E a imprime
+                 (fprintf (current-output-port)
+                          "Esta aresta nao foi percorrida: ~a \n"
+                          atual))
+               )
+           )
+         caminhos)
+    resp
+    )
+  )
