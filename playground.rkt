@@ -194,7 +194,7 @@
 (define goo (list-ref sec-list (list-ref (extrair sec-list) 1)))
 
 
-(define lili (list 1 22 1 2))
+(define lili (list 1 22 1 3 42 1))
 
 ;testando usar  map como retorno logico
 ;dessa forma conseguimos fazer o if  OR para todas as possibilidades de caminho que um pode label pode seguir
@@ -213,13 +213,55 @@
 
 (define gooio (or-map-test lili))
 
-
-
-
+;Testando printar umalista com variaveis
 (define prt
   (lambda (list)
     (fprintf  (current-output-port)
               "Que  porraeh  essa : ~a" list)))
 
+;Aqui embaixo vo testar se modificacoes sao carregadas ao longo de operacoes
 
+(struct grafo (lista-arestas no-atual))
 
+(define entrada (list (list "A B a"  "B C b" "C A c") 'A))
+
+(define build-grafo
+  (lambda (entrada)
+    (define arestas (map (lambda (atual)
+                          (st-to-sy atual))
+                        (first entrada))
+      )
+    (define arestas-com-booleana (map (lambda (atual) ; essa parte deve ser tirada caso nao utilizemos booleanas para  arestas percorridas
+                                        (append atual (list #f))
+                                        )
+                                      arestas)
+      )
+    (define graf-resp (grafo arestas-com-booleana (second entrada)));no caso de nao ter booleana coloque graf aqui
+    graf-resp
+    )
+  )
+
+(define e-grafo (build-grafo entrada))
+
+(define mudar1
+  (lambda (graf)
+    (mudar2 graf)
+    (fprintf  (current-output-port)
+               "Que  porra eh  essa : ~a\n" graf))
+  )
+
+(define mudar2
+  (lambda (graf)
+    (map (lambda (atual)
+           (begin
+             (vector-set! atual 2 666)
+             (fprintf  (current-output-port)
+               "Dentro : ~a\n" atual))
+           )
+         graf)
+    (fprintf  (current-output-port)
+               "Que  porra eh  essa : ~a\n" graf)
+    )
+  )
+
+(define vlist (list (vector 1 22 1) (vector 3 42 1)))
