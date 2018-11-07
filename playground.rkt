@@ -193,3 +193,33 @@
 
 (define goo (list-ref sec-list (list-ref (extrair sec-list) 1)))
 
+
+(define lili (list 1 22 1 2))
+
+;testando usar  map como retorno logico
+;dessa forma conseguimos fazer o if  OR para todas as possibilidades de caminho que um pode label pode seguir
+(define or-map-test
+  (lambda (list)
+    (define holder #f)
+    (map (lambda (e)
+                  (if(= 1 e)
+                     (set! holder #t)
+                     #f))
+                list)
+    holder
+    )
+  )
+
+
+(define gooio (or-map-test lili))
+
+
+
+
+(define prt
+  (lambda (list)
+    (fprintf  (current-output-port)
+              "Que  porraeh  essa : ~a" list)))
+
+
+

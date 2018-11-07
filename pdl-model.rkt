@@ -54,7 +54,7 @@
 
 (define extrair-ex; retorna uma lista que a primeira  posicao eh uma lista normal qeu seria retornada em extrair e tambema posicao de ")"
   (lambda (list-sym)
-    (define resp (filter not-void? (part1-e-p list-sym)))
+    (define resp (filter not-void? (part-extrair-parenteses list-sym)))
     (define position (- (list-ref (car resp) 1) 1)) ;;soma 1 amaispor  isso tenho que colocar essa loucura
     (list (caar resp) position)
     )
@@ -90,30 +90,6 @@
 
 (define e-grafo (build-grafo entrada))
 
-#|
-(a;b)Uc
-lidando com U
-(if (or (funcao (grafo "(a;b)") (funcao(grafo "c")))
-'( ( a ; b ) )
-
-lidando com ;
-
-(funcao(grafo "(a;(bUc;d))")
-
-(if (funcao (grafo "a"))
-    (funcao (grafo <tudo depois do ";">))
-    #\f))
-|#
-
-
-#|
-<sub-string>U<Substring> ; <TAIL>
-FUNC  <TAIL> <Ponto-esquerda>
-FUNC  <TAIL> <Ponto-direita>
-Executa U  (substring-esquerda substring-direita tail grafo)
-|#
-
-
 
 ;Temos que definir quais seram o PASSOS para resolver nosso problema, para ai conseguirmos quebrar ele em pedacos menores
 (define caminhos-validos
@@ -121,6 +97,10 @@ Executa U  (substring-esquerda substring-direita tail grafo)
     (filter (lambda (aresta)
               (and (symbol=? (first aresta) origem) (symbol=? (third aresta) label))) 
               lista-arestas)))
+
+
+
+#| Esta funcao foi substituida pela or-map por tratarmoso comando  de forma  atomica,e precisamos de umafuncao que retorne #t ou #f
 
 (define pont-virg ;Assume que seja um atomico e um ; em seguida
   (lambda (graf comando FUNC)
@@ -134,9 +114,26 @@ Executa U  (substring-esquerda substring-direita tail grafo)
               validos)
         )
     )
+  )|#
+
+
+;versao or-map para o trabalho
+;
+(define or-map
+  (lambda (label graf tail FUNC)
+    (define resp #f)
+    (define validos (caminhos-validos (grafo-no-atual graf)(grafo-lista-arestas graf)label))
+    (map (lambda (valid)
+               (if(FUNC (grafo (grafo-lista-arestas graf)(second valid)) tail '()) ;irah testar a label ,andar no grafo eseguir em frente para cada caminho possivel
+                  (set! resp #t)
+                  (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+                           "Algo deu errado aqui: ~a , no ponto : ~a "
+                           valid
+                           (list (grafo-no-atual graf)))
+                  )
+              validos)
+        )
+    resp  ;valor de fato retornado #f ou #t
   )
-
-
-
-
+)
              
