@@ -7,7 +7,7 @@
   )
 
 (define executeU
-  (lambda ()
+  (lambda (graf sub-lista tail)
     (void))
   )
 
@@ -18,6 +18,26 @@
 
 (define executeParentese
   (lambda(graf lista tail)
+    (define extraido (extrair-ex lista)) ;lista : <sub-lista> , posicao-de-)
+    (define temp-tail (list-tail lista (second extraido)))
+    (define sub-lista (first extraido))
+    (cond
+      [(symbol=? (first temp-tail) '|;|)
+       (executePV)]
+      [(symbol=? (first temp-tail) 'U)
+       (define achado (encontra-PV temp-tail)) 
+       (define next-list (first achado))
+       (if (zero? (second achado))
+           (executeU (list-tail temp-tail (+ 1 (second achado)(second extraido))));tail eeh o resto apos  (define tail (list-tail temp-tail (+ 1 (second achado)(second extraido))))
+           (executeU '())); (define tail '())
+           ]
+      [(symbol=? (first temp-tail) '*)
+       (execute*)]
+      [else (if (FUNC graf (first extraido) '())
+                #t
+                #f)]
+      )
+
     (void))
   )
 
@@ -51,5 +71,15 @@
 
 (define or-map
   (lambda ()
+    (void))
+  )
+
+(define extrair-ex
+  (lambda ()
+    (void))
+  )
+
+(define encontra-PV
+  (lambda()
     (void))
   )
