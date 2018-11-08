@@ -2,12 +2,14 @@
 
 
 (define executePV
-  (lambda ()
-    (void))
+  (lambda (graf sub-lista tail)
+    (if(FUNC graf sub-lista tail)
+       (FUNC graf tail '())
+       (#f)))
   )
 
 (define executeU
-  (lambda (graf sub-lista tail)
+  (lambda (tail)
     (void))
   )
 
@@ -21,37 +23,42 @@
     (define extraido (extrair-ex lista)) ;lista : <sub-lista> , posicao-de-)
     (define temp-tail (list-tail lista (second extraido)))
     (define sub-lista (first extraido))
-    (cond
-      [(symbol=? (first temp-tail) '|;|)
-       (executePV)]
-      [(symbol=? (first temp-tail) 'U)
-       (define achado (encontra-PV temp-tail)) 
-       (define next-list (first achado))
-       (if (zero? (second achado))
-           (executeU (list-tail temp-tail (+ 1 (second achado)(second extraido))));tail eeh o resto apos  (define tail (list-tail temp-tail (+ 1 (second achado)(second extraido))))
-           (executeU '())); (define tail '())
+    (if (null? temp-tail)
+        (FUNC graf sub-lista '());soh roda
+        (cond
+          [(symbol=? (first temp-tail) '|;|)
+           (executePV graf sub-lista tail)]
+          [(symbol=? (first temp-tail) 'U)
+           (define achado (encontra-PV temp-tail)) 
+           (define next-list (first achado))
+           (if (zero? (second achado))
+               (executeU (list-tail temp-tail (+ 1 (second achado)(second extraido))));tail eeh o resto apos  (define tail (list-tail temp-tail (+ 1 (second achado)(second extraido))))
+               (executeU '())); (define tail '())
            ]
-      [(symbol=? (first temp-tail) '*)
-       (execute*)]
-      [else (if (FUNC graf (first extraido) '())
-                #t
-                #f)]
-      )
-
-    (void))
+          [(symbol=? (first temp-tail) '*)
+           (execute*)]
+          [else (if (FUNC graf (first extraido) '())
+                    #t
+                    #f)]
+          )
+        )
+    )
   )
 
 (define executeLetra
   (lambda(graf lista tail)
     (define label (first lista))
-    (cond
-      [(symbol=? (second lista) '|;|)(executePV)]
-      [(symbol=? (second lista) 'U)(executeU)]
-      [(symbol=? (second lista) '*)(execute*)]
-      [else (if (or-map label graf tail FUNC)
-                #t
-                #f)]
-      )
+    (if (null? (cdr lista))
+        (FUNC graf label tail)
+        (cond
+          [(symbol=? (second lista) '|;|)(executePV)]
+          [(symbol=? (second lista) 'U)(executeU)]
+          [(symbol=? (second lista) '*)(execute*)]
+          [else (if (or-map label graf tail FUNC)
+                    #t
+                    #f)]
+          )
+        )
     )
   )
 
