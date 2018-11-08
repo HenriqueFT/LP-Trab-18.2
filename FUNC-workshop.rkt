@@ -76,6 +76,14 @@
 
 ;-----------------------------------------------------------------Coisas apos aquija estao implementadas----------------------------------------
 
+(define not-void?;umaprocedure que faz  o oposto de void? , feita na necessidade de filtrarmos voids
+  (lambda (any)
+    (if (void? any)
+        #f
+        #t)
+    )
+  )
+
 (define or-map
   (lambda ()
     (void))
@@ -86,7 +94,56 @@
     (void))
   )
 
-(define encontra-PV
-  (lambda()
-    (void))
+(define encontra-PV-void
+  (lambda (sym-list)
+    
+    (let ([counter 0]
+          [achado #f]
+          [buffer '()])
+      (map (lambda (s-atual)
+             (if achado
+                 (void)
+                 (cond
+                   [(symbol=? s-atual '|(| )
+                    (if (positive? counter) ;em ambos os casos (ser >0 ou nao) iremos incrementar
+                        (begin
+                          (set! buffer (append buffer (list s-atual)))
+                          (set! counter (+ counter 1)))
+                        (set! counter (+ counter 1)))
+                    ]
+                   [(symbol=? s-atual '|)| )
+                    (set! counter (- counter 1))
+                    (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirado um ( antes, a nao  ser que apenas nao tenha
+                        (set! buffer (append buffer (list s-atual)))
+                        buffer)]
+                   [(and (symbol=? s-atual '|;| ) (zero? counter))
+                    (set! achado #t )
+                    (set! buffer (append buffer #t))
+                    buffer
+                    
+                 
+                    ]
+                   [else (set! buffer (append buffer (list s-atual)))]
+                   )
+                 
+                 )
+             )
+           (list-tail sym-list 1))
+      )
+
+    
+    )
   )
+
+(define encontra-PV
+  (lambda (sym-list)
+   (define retorno(filter not-void? (encontra-PV-void sym-list)))
+    (if (boolean? (last retorno))
+        (begin
+          (remove #t retorno)
+          (list retorno (+ (length retorno) 2 ))
+          
+          )
+        (list retorno 0)
+    )))
+      

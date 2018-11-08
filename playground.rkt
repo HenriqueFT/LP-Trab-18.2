@@ -330,4 +330,47 @@
 
 ;(define listatest (list (list 1 2) #t))
 
+(define encontra-U
+    (lambda (sym-list)
+    
+    (let ([counter 0]
+          [achado #f]
+          [bufferzinho '()]
+          [buffer '()])
+      (map (lambda (s-atual)
+             (if achado
+                 (void)
+                 (cond
+                   [(symbol=? s-atual '|(| )
+                    (if (positive? counter) ;em ambos os casos (ser >0 ou nao) iremos incrementar
+                        (begin
+                          (set! bufferzinho (append bufferzinho (list s-atual)))
+                          (set! counter (+ counter 1)))
+                        (set! counter (+ counter 1)))
+                    ]
+                   [(symbol=? s-atual '|)| )
+                    (set! counter (- counter 1))
+                    (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirado um ( antes, a nao  ser que apenas nao tenha
+                        (set! bufferzinho (append bufferzinho (list s-atual)))
+                        buffer)]
+                   [(and (symbol=? s-atual 'U ) (zero? counter))
+                    ;(set! achado #t )
+                    (set! buffer (append buffer (list bufferzinho)))
+                    buffer
+                    
+                 
+                    ]
+                   [else (set! bufferzinho (append bufferzinho (list s-atual)))]
+                   )
+                 
+                 )
+             )
+           (list-tail sym-list 1))
+      )
+))
+
+
+
+
+
 
