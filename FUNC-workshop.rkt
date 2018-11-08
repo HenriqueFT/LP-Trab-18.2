@@ -14,20 +14,50 @@
   )
 
 (define execute*
-  (lambda()
-    (void))
+  (lambda(graf lista tail command)
+    (if (execute*-rec graf lista tail command '() 50 0);
+        (FUNC tail graf '())
+        #f
+        )
+    )
   )
 
+(define execute*-rec
+  (lambda (graf lista tail command buffer limite-rec counter) ;observe que  aquivemos como apenas se fosse uma lista,mas eh  obuffer que estasendo modificado pela funcao acima.
+    (if(cond ;esss cond ta imcompleto
+         [(symbol=? command '|;|)
+          (executePV graf lista tail)]
+         [(symbol=? command '|U|)
+          (executeU)]
+         [(symbol=? command '()) ;bem se nao tem proximo comando, nao tem tail
+          (FUNC graf lista '())])
+       #t
+       (if (> limite-rec counter) ;limite de quantas repeticoes do que ta em volto por * seguidamente, ex: <list>* |Se executa <list>;<list>;...;<list> . o limite de <list>'s seguidos que testaremos  
+           (begin
+             (set! counter (+ counter 1))
+             (if (null? buffer) ;;aqui vamos aumentando quantas vezes sao executadas
+                 (set! buffer(append buffer lista ))
+                 (set! buffer(append buffer '(|;|) lista ))
+                 )
+             (execute*-rec graf buffer tail command buffer limite-rec counter))
+           #f ;se passar chegar a 50 retorna falso
+           )
+       )
+    )
+  )   
+  
+  
 (define executeParentese
   (lambda(graf lista tail)
     (define extraido (extrair-ex lista)) ;lista : <sub-lista> , posicao-de-)
     (define temp-tail (list-tail lista (second extraido)))
+    (define real-tail (list-tail temp-tail 1));aqui estaremos criando a tail sem o comando
     (define sub-lista (first extraido))
     (if (null? temp-tail)
         (FUNC graf sub-lista '());soh roda
         (cond
           [(symbol=? (first temp-tail) '|;|)
-           (executePV graf sub-lista tail)]
+           (executePV graf sub-lista real-tail)]
           [(symbol=? (first temp-tail) 'U)
            (define achado (encontra-PV temp-tail)) 
            (define next-list (first achado))
@@ -48,12 +78,13 @@
 (define executeLetra
   (lambda(graf lista tail)
     (define label (first lista))
+    (define comando (second lista))
     (if (null? (cdr lista))
         (FUNC graf label tail)
         (cond
-          [(symbol=? (second lista) '|;|)(executePV)]
-          [(symbol=? (second lista) 'U)(executeU)]
-          [(symbol=? (second lista) '*)(execute*)]
+          [(symbol=? comando '|;|)(executePV)]
+          [(symbol=? comando 'U)(executeU)]
+          [(symbol=? comando '*)(execute*)]
           [else (if (or-map label graf tail FUNC)
                     #t
                     #f)]
