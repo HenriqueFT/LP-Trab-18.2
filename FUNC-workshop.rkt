@@ -2,19 +2,29 @@
 
 
 (define executePV
-  (lambda (graf sub-lista tail)
-    (if(FUNC graf sub-lista tail)
+  (lambda (graf lista tail)
+    (define lista-sem-comando (list-tail lista 1))  
+    (if(FUNC graf  lista-sem-comando tail)
        (FUNC graf tail '())
-       (#f)))
+       #f))
   )
 
 (define executeU
-  (lambda (tail)
-    (void))
+  (lambda (graf lista tail)
+    (define lista-sem-comando (list-tail lista 1))  
+    (define lista-de-programas (encontra-U tail))
+    (if (ormap (lambda (prog-atual)
+                 (FUNC prog-atual graf tail))
+               lista-de-programas)
+        (FUNC graf tail '())
+        #f
+        )
+    )
   )
 
 (define execute*
-  (lambda(graf lista tail command)
+  (lambda(graf lista tail)
+    (define command (list-ref lista 0))
     (if (execute*-rec graf lista tail command '() 50 0);
         (FUNC tail graf '())
         #f
@@ -45,7 +55,14 @@
        )
     )
   )   
-  
+
+(define executa-atomico
+  (lambda (graf label tail)
+    (if(or-map label graf tail FUNC)
+       #t
+       #f)
+    )
+  )
   
 (define executeParentese
   (lambda(graf lista tail)
@@ -59,14 +76,9 @@
           [(symbol=? (first temp-tail) '|;|)
            (executePV graf sub-lista real-tail)]
           [(symbol=? (first temp-tail) 'U)
-           (define achado (encontra-PV temp-tail)) 
-           (define next-list (first achado))
-           (if (zero? (second achado))
-               (executeU (list-tail temp-tail (+ 1 (second achado)(second extraido))));tail eeh o resto apos  (define tail (list-tail temp-tail (+ 1 (second achado)(second extraido))))
-               (executeU '())); (define tail '())
-           ]
+           (executeU graf sub-lista real-tail)]
           [(symbol=? (first temp-tail) '*)
-           (execute*)]
+           (execute* graf sub-lista real-tail)]
           [else (if (FUNC graf (first extraido) '())
                     #t
                     #f)]
@@ -78,13 +90,13 @@
 (define executeLetra
   (lambda(graf lista tail)
     (define label (first lista))
-    (define comando (second lista))
+    ;(define comando (second lista))
     (if (null? (cdr lista))
-        (FUNC graf label tail)
+        (executa-atomico graf label tail)
         (cond
-          [(symbol=? comando '|;|)(executePV)]
-          [(symbol=? comando 'U)(executeU)]
-          [(symbol=? comando '*)(execute*)]
+          [(symbol=? (second lista) '|;|)(executePV)]
+          [(symbol=? (second lista) 'U)(executeU)]
+          [(symbol=? (second lista) '*)(execute*)]
           [else (if (or-map label graf tail FUNC)
                     #t
                     #f)]
@@ -100,7 +112,7 @@
         (if (symbol=? (first lista) '|(| )
             (executeParentese(graf lista tail));aqui executaremos tudo caso tenha ( na frente
             (executeLetra(graf lista tail))
-          )
+            )
         )
     )
   )
@@ -168,7 +180,7 @@
 
 (define encontra-PV
   (lambda (sym-list)
-   (define retorno(filter not-void? (encontra-PV-void sym-list)))
+    (define retorno(filter not-void? (encontra-PV-void sym-list)))
     (if (boolean? (last retorno))
         (begin
           (remove #t retorno)
@@ -176,5 +188,9 @@
           
           )
         (list retorno 0)
-    )))
-      
+        )))
+
+(define encontra-U
+  (lambda ()
+    (void)))
+
