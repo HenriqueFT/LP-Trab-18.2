@@ -2,12 +2,14 @@
 
 
 (define executePV
-  (lambda ()
-    (void))
+  (lambda (graf sub-lista tail)
+    (if(FUNC graf sub-lista tail)
+       (FUNC graf tail '())
+       (#f)))
   )
 
 (define executeU
-  (lambda (graf sub-lista tail)
+  (lambda (tail)
     (void))
   )
 
@@ -25,7 +27,7 @@
         (FUNC graf sub-lista '());soh roda
         (cond
           [(symbol=? (first temp-tail) '|;|)
-           (executePV)]
+           (executePV graf sub-lista tail)]
           [(symbol=? (first temp-tail) 'U)
            (define achado (encontra-PV temp-tail)) 
            (define next-list (first achado))
