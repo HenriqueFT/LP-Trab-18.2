@@ -1,5 +1,7 @@
 #lang racket
 
+;----------------------------------------Codigo utilizado para  aprendizado de racket e testes------------------------------------------------
+
 ;LEIA
 ;Aqui serah o lugar onde poderemos brincar e aprender racket,serve  qualquer coisa aqui
 ;Faca anotacoes do que quis fazer para o outro entender e aprender com o que vc fez
@@ -45,7 +47,7 @@
 
 (define addL3
   (lambda (list1 list2)
-    (define BANANA (list "Chupa o  bico do meu peito e mete com vontade"))
+    (define BANANA (list "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH"))
     (define recursivo
       (lambda (tempL list1 list2)
         (if (or (null? list1) (null? list2))
@@ -217,7 +219,7 @@
 (define prt
   (lambda (list)
     (fprintf  (current-output-port)
-              "Que  porraeh  essa : ~a" list)))
+              "Que  eh  isso : ~a" list)))
 
 ;Aqui embaixo vo testar se modificacoes sao carregadas ao longo de operacoes
 
@@ -370,6 +372,19 @@
 ))
 
 
+(define huhu (list 'a))
+
+(define mer
+  (lambda list
+    (if (pair? list)
+        (begin
+          (writeln (symbol=? (car list) '|(|)))
+        (begin
+          (set! list (append list 'o))
+          (writeln (symbol=? (car list) '|(|)))
+        )
+    )
+  )
 
 
 
