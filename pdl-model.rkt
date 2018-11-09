@@ -6,9 +6,9 @@
 ;Assim ta definidopelomenos  um grafo que podemos usar como testes
 ;(define entrada (list (list (list 'A 'B 'a) (list 'A 'C 'b) (list 'C 'D 'c)) 'A))
 
-(define grafo-entrada (list (list "A B a"  "B C b" "C A c") 'A))
+(define grafo-entrada (list (list "A B a" ) 'A)) ;"B C b" "C A c"
 
-(define pdl-string "a ; b ; c")
+(define pdl-string " a ")
          
 ;aqui to usando string simplesmente pq permite ; mas podemos usar listas e  usar outro  simbolo para  fazer o ; 
 (define pdl-teste1 "a ; b ; c")
@@ -131,7 +131,8 @@
     (define resp #f)
     (define validos (caminhos-validos (grafo-no-atual graf) (grafo-vetor-arestas graf) label)) ;; isso eh um vector
     (vector-map (lambda (valid)
-                  (if(FUNC (set! graf (grafo (grafo-vetor-arestas graf)(vector-ref valid 2))) tail '()) ;irah testar a label ,andar no grafo eseguir em frente para cada caminho possivel
+                  (set! graf (grafo (grafo-vetor-arestas graf)(vector-ref valid 2)))
+                  (if(FUNC graf tail '()) ;irah testar a label ,andar no grafo eseguir em frente para cada caminho possivel
                      (begin
                        (set! resp #t)
                        (vector-set! valid 3 #t)) ;se tiver tudo certo aqui,isso marcarah as arestas passadas
@@ -151,6 +152,7 @@
   (lambda (graf)
     (define resp #t)
     (define caminhos (grafo-vetor-arestas graf))
+    (writeln caminhos)
     (vector-map (lambda (atual)
                   (if (vector-ref atual (- (vector-length atual) 1))
                       (void) ;se tiver #t nao faz nada
