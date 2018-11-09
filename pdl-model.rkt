@@ -7,16 +7,16 @@
 ;Qualquer combinacao de letras e numeros em sequencia podem representar qual quer um dos  3, porem soh devem haver 3 (por string) e devem ser separadas por espaco
 ;O ultimo simbolo eh '<ponto de origem> . Pode ser qualquer sequencia de caracteres,mas deve possuir um ' logo antes 
 
-(define grafo-entrada (list (list "A A a" "A B b"  ) 'A)) 
+(define grafo-entrada (list (list  "A A a" "A B b" "B C c"  ) 'A)) 
 
 ;Dentro desta string conterah o programa a ser testado
 ;As regras acima permanessem, todo  caracter deve ser separado por um espaco. Isso inclui oscomandos ; U e * . Assim como os parenteses
 
-(define pdl-string " a  * ; b ")
+(define pdl-string " ( a ; b ) * ; c *")
 
 ;grafo-exemplos
-;"A B a" "B C b" "C A c"
-;"A B a" "B C b" "C D c" "D E a" "E F b" "F G c" 
+; "A A a" "A B b" 
+;"A B a" "B C b" "C A c" 
 ;"A B a" "A C b" "C A c"
 
 ;pdl-string exemplos
@@ -339,15 +339,22 @@
     )
 
   (define execute* ;executa *  ,ou seja se o proximo comando era * este serah tratado
-    (lambda(graf lista tail)
+    (lambda(graf lista tail parentese)
       (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
                "EXECUTE * \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
                (grafo-vetor-arestas graf)
                (vector-ref (grafo-no-atual graf)0)
                lista
                tail)
-      (define command (list-ref tail 0))
-      (if (execute*-rec graf lista (list-tail tail 1) command '() 10 0); 50 foi o valor  maximo de execussoes seguidas do que ta marcado por * que serao feitas
+      (define command 'b)
+      (if(null? tail)
+         (set! command '||)
+         (set! command (list-ref tail 0)))
+      (define novo-tail '())
+      (if(null? tail)
+         (set! novo-tail '())
+         (set! novo-tail (list-tail tail 1)))
+      (if (execute*-rec graf lista novo-tail command '() (vector-length (grafo-vetor-arestas graf)) 0 parentese); 50 foi o valor  maximo de execussoes seguidas do que ta marcado por * que serao feitas
           #t
           #f
           )
@@ -355,14 +362,26 @@
     )
 
   (define execute*-rec
-    (lambda (graf lista tail command buffer limite-rec counter) ;observe que  aquivemos como apenas se fosse uma lista,mas eh  obuffer que estasendo modificado pela funcao acima.
-      (if(cond 
+    (lambda (graf lista tail command buffer limite-rec counter parentese) ;observe que  aquivemos como apenas se fosse uma lista,mas eh  obuffer que estasendo modificado pela funcao acima.
+      (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+               "EXECUTE * REC \n Comando: ~a \n Buffer : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+               command
+               buffer
+               lista
+               tail)
+      (define real (cond 
            [(symbol=? command '|;|)
-            (executePV graf lista tail #t)]
+            (if parentese
+            (executePV graf lista tail #t)
+            (executePV graf lista tail #f))]
            [(symbol=? command '|U|)
-            (executeU graf lista tail #t)]
-           [(symbol=? command '|| ) ;bem se nao tem proximo comando, nao tem tail
-            (FUNC graf lista '())])
+            (if parentese
+            (executeU graf lista tail #t)
+            (executeU graf lista tail #f))]
+           [else (if(symbol=? command '|| ) ;bem se nao tem proximo comando, nao tem tail
+                    (FUNC graf lista '())
+                    (void)) ]))
+      (if real
          #t 
          (if (> limite-rec counter) ;limite de quantas repeticoes do que ta em volto por * seguidamente, ex: <list>* |Se executa <list>;<list>;...;<list> . o limite de <list>'s seguidos que testaremos  
              (begin
@@ -371,7 +390,7 @@
                    (set! buffer(append buffer lista ))
                    (set! buffer(append buffer '(|;|) lista ))
                    )
-               (execute*-rec graf buffer tail command buffer limite-rec counter))
+               (execute*-rec graf buffer tail command buffer limite-rec counter parentese))
              #f ;se passar chegar a 50 retorna falso
              )
          )
@@ -419,7 +438,7 @@
             [(symbol=? (first temp-tail) 'U)
              (executeU graf sub-lista real-tail #t)]
             [(symbol=? (first temp-tail) '*)
-             (execute* graf sub-lista real-tail )]
+             (execute* graf sub-lista real-tail #t)]
             [else (if (FUNC graf (first extraido) '())
                       #t
                       #f)]
@@ -443,7 +462,7 @@
           (cond
             [(symbol=? (second lista) '|;|)(executePV graf (list label) (list-tail lista 2) #f)]
             [(symbol=? (second lista) 'U)(executeU graf (list label) (list-tail lista 2) #f)]
-            [(symbol=? (second lista) '*)(execute* graf (list label) (list-tail lista 2) )]
+            [(symbol=? (second lista) '*)(execute* graf (list label) (list-tail lista 2) #f)]
             [else (if (or-map label graf tail FUNC)
                       #t
                       #f)]
