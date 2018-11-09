@@ -1,0 +1,12 @@
+-Leia Como_Rodar.txt para saber como compilar e rodar  o programa
+-As entradas devem ser diretamente no codigo "pdl-model.rkt"
+-O codigo  tem uma explicacao de como mudar as entradas
+-Tambem se  tem a "Ajuda-ilustrativa.png" para caso seja necessaria
+-O "pdl_diagram_resolution.png" eh uma arvore que representa todas as chamadas feitas por FUNC que  foi utilizada para a criacaodo programa. 
+	Algumas modificacoes foram feitas ao final do desenvolvimento do projeto para corrigir erros e nao puderamser atualizadas no diagrama
+	Mas ele ainda serve como um bom entendimento de como o codigo  funciona
+	(obs pdl_diagram_resolution.xml pode ser aberto por algo como o site draw.io caso interesse)
+-Os arquivos "FUNC-workshop.rkt" & "playground" ,foram utilizadas como 
+	esqueleto de FUNC que seguia o diagrama e	
+	para fazer testes e aprender sobre a linguagem Racket
+	

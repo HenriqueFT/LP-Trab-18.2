@@ -1,0 +1,7 @@
+0- Instale Racket (https://racket-lang.org/download/)
+1- Tenha Racket Instalado
+2- Coloque Racket no PATH de seu sistema. Para Linux o path serah no "C:\program files\Racket\bin".
+3- Abra o CMD
+4- "Ande" ateh a pasta onde estah o programa
+5- Entre o comando "raco exe pdl-model.rkt"
+6- Em seguida "pdl-model" (para Linux, pdl-model.exe para Windows)

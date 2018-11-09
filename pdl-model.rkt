@@ -2,13 +2,17 @@
 
 ;-------------------------------------------------------Primeiramente entradas e testes-----------------------------------------------------------
 
-;note que essa eh uma  lsita  dearestas,nao tivemos que definir nada,pq nao precisa ter um OBJETO
-;Assim ta definidopelomenos  um grafo que podemos usar como testes
-;(define entrada (list (list (list 'A 'B 'a) (list 'A 'C 'b) (list 'C 'D 'c)) 'A))
+;Cada aresta eh dada por um trio de "simbolos" separados  por um espaco " "
+;A orde  que estao eh (Origem Destino Label).
+;Qualquer combinacao de letras e numeros em sequencia podem representar qual quer um dos  3, porem soh devem haver 3 (por string) e devem ser separadas por espaco
+;O ultimo simbolo eh '<ponto de origem> . Pode ser qualquer sequencia de caracteres,mas deve possuir um ' logo antes 
 
-(define grafo-entrada (list (list "A B a" "A C b" ) 'A)) 
+(define grafo-entrada (list (list "A A a" "A B b"  ) 'A)) 
 
-(define pdl-string " a U b ")
+;Dentro desta string conterah o programa a ser testado
+;As regras acima permanessem, todo  caracter deve ser separado por um espaco. Isso inclui oscomandos ; U e * . Assim como os parenteses
+
+(define pdl-string " a  * ; b ")
 
 ;grafo-exemplos
 ;"A B a" "B C b" "C A c"
@@ -18,6 +22,7 @@
 ;pdl-string exemplos
 ; a ; b ; c
 ;( a ; b ; c ) *
+;( a ; b ) * ; c 
 
 
 ;------------------------------------------------Aqui em cima colocaremos funcoes de apoio a resolucao--------------------------------------------
@@ -172,57 +177,55 @@
     )
   )
 
-
-
+(define e-PV-void-support
+  (lambda (buffer achado)
+    (if achado
+        buffer
+        (begin
+          (set! buffer (append buffer #f))
+          buffer
+          )
+        )
+    )
+)
 
 (define encontra-PV-void
   (lambda (sym-list)
+    (write sym-list)
     (let ([counter 0]
           [achado #f]
           [buffer '()])
-      (begin
-        (map (lambda (s-atual)
-               (if achado
-                   (void)
-                   (cond
-                     [(symbol=? s-atual '|(| )
-                      (if (positive? counter) ;em ambos os casos (ser >0 ou nao) iremos incrementar
-                          (begin
-                            (set! buffer (append buffer (list s-atual)))
-                            (set! counter (+ counter 1)))
-                          (set! counter (+ counter 1)))
-                      ]
-                     [(symbol=? s-atual '|)| )
-                      (set! counter (- counter 1))
-                      (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirado um ( antes, a nao  ser que apenas nao tenha
-                          (set! buffer (append buffer (list s-atual)))
-                          buffer)]
-                     [(and (symbol=? s-atual '|;| ) (zero? counter))
-                      (set! achado #t )
-                      (set! buffer (append buffer #t))
-                      buffer
-                    
-                 
-                      ]
-                     [else (set! buffer (append buffer (list s-atual)))]
-                     )
-                 
-                   )
-               )
-             (list-tail sym-list 1))
-        (writeln buffer)
-        (if achado
-            buffer
-            (begin
-              (set! buffer (append buffer #f))
-              buffer
-              )
-
-            )
-        )
+      
+      (e-PV-void-support (map (lambda (s-atual)
+                                (if achado
+                                    (void)
+                                    (cond
+                                      [(symbol=? s-atual '|(| )
+                                       (if (positive? counter) ;em ambos os casos (ser >0 ou nao) iremos incrementar
+                                           (begin
+                                             (set! buffer (append buffer (list s-atual)))
+                                             (set! counter (+ counter 1)))
+                                           (set! counter (+ counter 1)))
+                                       ]
+                                      [(symbol=? s-atual '|)| )
+                                       (set! counter (- counter 1))
+                                       (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirado um ( antes, a nao  ser que apenas nao tenha
+                                           (set! buffer (append buffer (list s-atual)))
+                                           buffer)]
+                                      [(and (symbol=? s-atual '|;| ) (zero? counter))
+                                       (set! achado #t )
+                                       (set! buffer (append buffer #t))
+                                       ]
+                                      [else (set! buffer (append buffer (list s-atual)))]
+                                      )
+                                    )
+                                )
+                              (list-tail sym-list 1)
+                              )
+                         achado)
       )
     )
-)
+  )
   (define encontra-PV
     (lambda (sym-list)
       (define retorno (filter not-void? (encontra-PV-void sym-list)))
@@ -327,7 +330,7 @@
       (if (ormap (lambda (prog-atual)
                    (FUNC graf prog-atual tail))
                  lista-de-programas)
-          (if (parentese)
+          (if parentese
               (FUNC graf tail '())
               #t)
           #f
@@ -336,18 +339,16 @@
     )
 
   (define execute* ;executa *  ,ou seja se o proximo comando era * este serah tratado
-    (lambda(graf lista tail parentese)
+    (lambda(graf lista tail)
       (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
                "EXECUTE * \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
                (grafo-vetor-arestas graf)
                (vector-ref (grafo-no-atual graf)0)
                lista
                tail)
-      (define command (list-ref lista 0))
-      (if (execute*-rec graf lista tail command '() 50 0); 50 foi o valor  maximo de execussoes seguidas do que ta marcado por * que serao feitas
-          (if (parentese)
-              (FUNC graf tail '())
-              #t)
+      (define command (list-ref tail 0))
+      (if (execute*-rec graf lista (list-tail tail 1) command '() 10 0); 50 foi o valor  maximo de execussoes seguidas do que ta marcado por * que serao feitas
+          #t
           #f
           )
       )
@@ -357,9 +358,9 @@
     (lambda (graf lista tail command buffer limite-rec counter) ;observe que  aquivemos como apenas se fosse uma lista,mas eh  obuffer que estasendo modificado pela funcao acima.
       (if(cond 
            [(symbol=? command '|;|)
-            (executePV graf lista tail)]
+            (executePV graf lista tail #t)]
            [(symbol=? command '|U|)
-            (executeU graf lista tail)]
+            (executeU graf lista tail #t)]
            [(symbol=? command '|| ) ;bem se nao tem proximo comando, nao tem tail
             (FUNC graf lista '())])
          #t 
@@ -418,7 +419,7 @@
             [(symbol=? (first temp-tail) 'U)
              (executeU graf sub-lista real-tail #t)]
             [(symbol=? (first temp-tail) '*)
-             (execute* graf sub-lista real-tail #t)]
+             (execute* graf sub-lista real-tail )]
             [else (if (FUNC graf (first extraido) '())
                       #t
                       #f)]
@@ -442,7 +443,7 @@
           (cond
             [(symbol=? (second lista) '|;|)(executePV graf (list label) (list-tail lista 2) #f)]
             [(symbol=? (second lista) 'U)(executeU graf (list label) (list-tail lista 2) #f)]
-            [(symbol=? (second lista) '*)(execute* graf (list label) (list-tail lista 2) #f)]
+            [(symbol=? (second lista) '*)(execute* graf (list label) (list-tail lista 2) )]
             [else (if (or-map label graf tail FUNC)
                       #t
                       #f)]
@@ -476,9 +477,11 @@
   ;------------Preparacao----------------------
   (define run
     (lambda ()
-      (writeln (FUNC e-grafo e-programa '()))
-      (nao-percorridas e-grafo)
+      (if(and (FUNC e-grafo e-programa '()) (nao-percorridas e-grafo))
+         (writeln "DEU TUDO CERTO!!!")
+         (writeln "Nao tivemos sucesso :/  ")
       )
+    )
     )
 
   (run)
