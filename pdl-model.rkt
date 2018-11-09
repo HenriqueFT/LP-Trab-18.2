@@ -6,14 +6,18 @@
 ;Assim ta definidopelomenos  um grafo que podemos usar como testes
 ;(define entrada (list (list (list 'A 'B 'a) (list 'A 'C 'b) (list 'C 'D 'c)) 'A))
 
-(define grafo-entrada (list (list "A B a" "B C b" ) 'A)) ;"B C b" "C A c"
+(define grafo-entrada (list (list "A B a" "B C b" "C A c") 'A)) ;"B C b" "C A c"
 
-(define pdl-string "a ; b")
-         
-;aqui to usando string simplesmente pq permite ; mas podemos usar listas e  usar outro  simbolo para  fazer o ; 
-(define pdl-teste1 "a ; b ; c")
-(define pdl-teste2 "( a U b ) ; c")
-(define pdl-teste3 "( a ) *")
+(define pdl-string "( a ; b ) ; c")
+
+;grafo-exemplos
+;"A B a" "B C b" "C A c"
+;"A B a" "B C b" "C D c" "D E a" "E F b" "F G c" 
+
+
+;pdl-string exemplos
+; a ; b ; c
+;( a ; b ; c ) *
 
 
 ;------------------------------------------------Aqui em cima colocaremos funcoes de apoio a resolucao--------------------------------------------
@@ -53,17 +57,6 @@
     )
   )
 
-
-;------------pequenos testes----------------
-(define t1 (st-to-sy pdl-teste1))
-(define t2 (st-to-sy pdl-teste2))
-(define t3 (st-to-sy pdl-teste3)) 
-
-
-
-(define e-programa(st-to-sy pdl-string))
-(define e-grafo (build-grafo grafo-entrada))
-;------------pequenos testes----------------
 
 
 (define not-void?;umaprocedure que faz  o oposto de void? , feita na necessidade de filtrarmos voids
@@ -284,24 +277,35 @@
     (append divide (second retorno))
     ))
 ;----------------------------------------------------------------Aqui serah  o corpo principal da resolucao------------------------------------------------------
-
-
 (define executePV ;executa  ; ,ou seja se o proximo comando era ; este serah tratado
   (lambda (graf lista tail)
+    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+             "EXECUTE PV \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+             (grafo-vetor-arestas graf)
+             (vector-ref (grafo-no-atual graf)0)
+             lista
+             tail)
     ;(define lista-sem-comando (list-tail lista 1))  
-    (if(FUNC graf lista  tail)
-       (FUNC graf tail '())
+    (if(FUNC graf lista tail)
+       ;(FUNC graf tail '())
+       #t
        #f))
   )
 
 (define executeU ;executa  U ,ou seja se o proximo comando era U este serah tratado
   (lambda (graf lista tail)
+    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+             "EXECUTE U \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+             (grafo-vetor-arestas graf)
+             (vector-ref (grafo-no-atual graf)0)
+             lista
+             tail)
     ;(define lista-sem-comando (list-tail lista 1))  
     (define lista-de-programas (encontra-U tail))
     (if (ormap (lambda (prog-atual)
                  (FUNC graf prog-atual tail))
                lista-de-programas)
-        (FUNC graf tail '())
+        #t
         #f
         )
     )
@@ -309,9 +313,15 @@
 
 (define execute* ;executa *  ,ou seja se o proximo comando era * este serah tratado
   (lambda(graf lista tail)
+    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+             "EXECUTE * \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+             (grafo-vetor-arestas graf)
+             (vector-ref (grafo-no-atual graf)0)
+             lista
+             tail)
     (define command (list-ref lista 0))
     (if (execute*-rec graf lista tail command '() 50 0); 50 foi o valor  maximo de execussoes seguidas do que ta marcado por * que serao feitas
-        (FUNC tail graf '())
+        (FUNC graf tail '())
         #f
         )
     )
@@ -319,14 +329,14 @@
 
 (define execute*-rec
   (lambda (graf lista tail command buffer limite-rec counter) ;observe que  aquivemos como apenas se fosse uma lista,mas eh  obuffer que estasendo modificado pela funcao acima.
-    (if(cond ;esss cond ta imcompleto
+    (if(cond 
          [(symbol=? command '|;|)
           (executePV graf lista tail)]
          [(symbol=? command '|U|)
-          (executeU)]
-         [(symbol=? command '()) ;bem se nao tem proximo comando, nao tem tail
+          (executeU graf lista tail)]
+         [(symbol=? command '|| ) ;bem se nao tem proximo comando, nao tem tail
           (FUNC graf lista '())])
-       #t
+       #t 
        (if (> limite-rec counter) ;limite de quantas repeticoes do que ta em volto por * seguidamente, ex: <list>* |Se executa <list>;<list>;...;<list> . o limite de <list>'s seguidos que testaremos  
            (begin
              (set! counter (+ counter 1))
@@ -343,6 +353,12 @@
 
 (define executa-atomico
   (lambda (graf label tail)
+    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+             "EXECUTE ATOMICO \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+             (grafo-vetor-arestas graf)
+             (vector-ref (grafo-no-atual graf)0)
+             label
+             tail)
     (if(or-map label graf tail FUNC)
        #t
        #f)
@@ -351,6 +367,12 @@
   
 (define executeParentese
   (lambda(graf lista tail)
+    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+             "EXECUTE parentese \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+             (grafo-vetor-arestas graf)
+             (vector-ref (grafo-no-atual graf)0)
+             lista
+             tail)
     ;as definicoes abaixo sao totalmente desncessessarias, apenas usadas como "apelidos"
     (define extraido (extrair-ex lista)) ;lista : <sub-lista> , posicao-de-)
     (define temp-tail (list-tail lista (second extraido)))
@@ -375,6 +397,12 @@
 
 (define executeLetra
   (lambda(graf lista tail)
+    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+             "EXECUTE LETRA \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+             (grafo-vetor-arestas graf)
+             (vector-ref (grafo-no-atual graf)0)
+             lista
+             tail)
     (define label (first lista))
     ;(define comando (second lista))
     (if (null? (cdr lista));caso nao tenha proximo comando
@@ -394,9 +422,9 @@
 (define FUNC
   (lambda (graf lista tail)
     (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
-             "Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n ____________________________ \n"
+             "CHAMADA DE FUNC \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
              (grafo-vetor-arestas graf)
-             (grafo-no-atual graf)
+             (vector-ref (grafo-no-atual graf)0)
              lista
              tail)
     (if (null? lista) ;caso FUNC tenha a  instrucao sendo uma lista '() ,quer dizer que chegou no final,entao reetorna #t
@@ -406,12 +434,18 @@
             (executeLetra graf lista tail)
             ) 
         )
+    
     )
   )
 
+;------------Preparacao----------------------
+(define e-programa(st-to-sy pdl-string))
+(define e-grafo (build-grafo grafo-entrada))
+;------------Preparacao----------------------
 (define run
   (lambda ()
     (writeln (FUNC e-grafo e-programa '()))
+    (nao-percorridas e-grafo)
     )
   )
 
