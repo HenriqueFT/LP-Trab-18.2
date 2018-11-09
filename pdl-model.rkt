@@ -180,60 +180,6 @@
     (let ([counter 0]
           [achado #f]
           [buffer '()])
-      (map (lambda (s-atual)
-             (if achado
-                 (void)
-                 (cond
-                   [(symbol=? s-atual '|(| )
-                    (if (positive? counter) ;em ambos os casos (ser >0 ou nao) iremos incrementar
-                        (begin
-                          (set! buffer (append buffer (list s-atual)))
-                          (set! counter (+ counter 1)))
-                        (set! counter (+ counter 1)))
-                    ]
-                   [(symbol=? s-atual '|)| )
-                    (set! counter (- counter 1))
-                    (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirado um ( antes, a nao  ser que apenas nao tenha
-                        (set! buffer (append buffer (list s-atual)))
-                        buffer)]
-                   [(and (symbol=? s-atual '|;| ) (zero? counter))
-                    (set! achado #t )
-                    (set! buffer (append buffer #t))
-                    buffer
-                    
-                 
-                    ]
-                   [else (set! buffer (append buffer (list s-atual)))]
-                   )
-                 
-                 )
-             )
-           (list-tail sym-list 1))
-      )
-    )
-  )
-
-(define encontra-PV
-  (lambda (sym-list)
-    (define retorno (filter not-void? (encontra-PV-void sym-list)))
-    (if (boolean? (last retorno))
-        (begin
-          (remove #t retorno)
-          (list retorno (+ (length retorno) 2 ))
-          )
-        (list retorno 0)
-        )
-    )
-  )
-      
-
-(define encontra-U-void
-  (lambda (sym-list)
-    
-    (let ([counter 0]
-          [achado #f]
-          [bufferzinho '()]
-          [buffer '()])
       (begin
         (map (lambda (s-atual)
                (if achado
@@ -242,233 +188,297 @@
                      [(symbol=? s-atual '|(| )
                       (if (positive? counter) ;em ambos os casos (ser >0 ou nao) iremos incrementar
                           (begin
-                            (set! bufferzinho (append bufferzinho (list s-atual)))
+                            (set! buffer (append buffer (list s-atual)))
                             (set! counter (+ counter 1)))
                           (set! counter (+ counter 1)))
                       ]
                      [(symbol=? s-atual '|)| )
                       (set! counter (- counter 1))
                       (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirado um ( antes, a nao  ser que apenas nao tenha
-                          (set! bufferzinho (append bufferzinho (list s-atual)))
+                          (set! buffer (append buffer (list s-atual)))
                           buffer)]
-                     [(and (symbol=? s-atual 'U ) (zero? counter))
-                      (begin
-                        (set! buffer (append buffer (list bufferzinho)))
-                        (set! bufferzinho (null) ))
-                      ]
                      [(and (symbol=? s-atual '|;| ) (zero? counter))
-                      (begin
-                        (set! achado #t )
-                        (set! buffer(append buffer (list bufferzinho)))
-                        (set! bufferzinho (null)))
-
+                      (set! achado #t )
+                      (set! buffer (append buffer #t))
+                      buffer
+                    
+                 
                       ]
-                     [else (set! bufferzinho (append bufferzinho (list s-atual)))]
+                     [else (set! buffer (append buffer (list s-atual)))]
                      )
+                 
                    )
                )
-             (list-tail sym-list 1)
-  
-             )
-        (if (equal? achado true)
-            (void)
-            (set! buffer(append buffer (bufferzinho)))
+             (list-tail sym-list 1))
+        (writeln buffer)
+        (if achado
+            buffer
+            (begin
+              (set! buffer (append buffer #f))
+              buffer
+              )
+
             )
         )
       )
-    ))
-
-(define encontra-U
-  (lambda (sym-list)
-    (define retorno (encontra-PV sym-list))
-    (define divide (encontra-U-void (first retorno)))
-    (append divide (second retorno))
-    ))
-;----------------------------------------------------------------Aqui serah  o corpo principal da resolucao------------------------------------------------------
-(define executePV ;executa  ; ,ou seja se o proximo comando era ; este serah tratado
-  (lambda (graf lista tail parentese)
-    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
-             "EXECUTE PV \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
-             (grafo-vetor-arestas graf)
-             (vector-ref (grafo-no-atual graf)0)
-             lista
-             tail)
-    ;(define lista-sem-comando (list-tail lista 1))
-    (if parentese
-        (if(and (FUNC graf lista tail) (FUNC graf tail '()))
-           #t
-           #f)
-        (if(FUNC graf lista tail)
-           #t
-           #f))
     )
-  )
-
-(define executeU ;executa  U ,ou seja se o proximo comando era U este serah tratado
-  (lambda (graf lista tail parentese)
-    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
-             "EXECUTE U \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
-             (grafo-vetor-arestas graf)
-             (vector-ref (grafo-no-atual graf)0)
-             lista
-             tail)
-    ;(define lista-sem-comando (list-tail lista 1))  
-    (define lista-de-programas (encontra-U tail))
-    (if (ormap (lambda (prog-atual)
-                 (FUNC graf prog-atual tail))
-               lista-de-programas)
-        (if (parentese)
-            (FUNC graf tail '())
-            #t)
-        #f
-        )
-    )
-  )
-
-(define execute* ;executa *  ,ou seja se o proximo comando era * este serah tratado
-  (lambda(graf lista tail parentese)
-    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
-             "EXECUTE * \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
-             (grafo-vetor-arestas graf)
-             (vector-ref (grafo-no-atual graf)0)
-             lista
-             tail)
-    (define command (list-ref lista 0))
-    (if (execute*-rec graf lista tail command '() 50 0); 50 foi o valor  maximo de execussoes seguidas do que ta marcado por * que serao feitas
-        (if (parentese)
-            (FUNC graf tail '())
-            #t)
-        #f
-        )
-    )
-  )
-
-(define execute*-rec
-  (lambda (graf lista tail command buffer limite-rec counter) ;observe que  aquivemos como apenas se fosse uma lista,mas eh  obuffer que estasendo modificado pela funcao acima.
-    (if(cond 
-         [(symbol=? command '|;|)
-          (executePV graf lista tail)]
-         [(symbol=? command '|U|)
-          (executeU graf lista tail)]
-         [(symbol=? command '|| ) ;bem se nao tem proximo comando, nao tem tail
-          (FUNC graf lista '())])
-       #t 
-       (if (> limite-rec counter) ;limite de quantas repeticoes do que ta em volto por * seguidamente, ex: <list>* |Se executa <list>;<list>;...;<list> . o limite de <list>'s seguidos que testaremos  
-           (begin
-             (set! counter (+ counter 1))
-             (if (null? buffer) ;;aqui vamos aumentando quantas vezes sao executadas
-                 (set! buffer(append buffer lista ))
-                 (set! buffer(append buffer '(|;|) lista ))
-                 )
-             (execute*-rec graf buffer tail command buffer limite-rec counter))
-           #f ;se passar chegar a 50 retorna falso
-           )
-       )
-    )
-  )   
-
-(define executa-atomico
-  (lambda (graf label tail)
-    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
-             "EXECUTE ATOMICO \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
-             (grafo-vetor-arestas graf)
-             (vector-ref (grafo-no-atual graf)0)
-             label
-             tail)
-    (if(or-map label graf tail FUNC)
-       #t
-       #f)
-    )
-  )
-  
-(define executeParentese
-  (lambda(graf lista tail)
-    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
-             "EXECUTE parentese \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
-             (grafo-vetor-arestas graf)
-             (vector-ref (grafo-no-atual graf)0)
-             lista
-             tail)
-    ;as definicoes abaixo sao totalmente desncessessarias, apenas usadas como "apelidos"
-    (define extraido (extrair-ex lista)) ;lista : <sub-lista> , posicao-de-)
-    (define temp-tail (list-tail lista (+ (second extraido) 1)))
-    (define real-tail (list-tail temp-tail 1));aqui estaremos criando a tail sem o comando
-    (define sub-lista (first extraido))
-    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
-             "\n LISTAS \n Extraido: ~a \n temp-tail: ~a \n real-tail : ~a \n sub-lista : ~a \n _______________________________________________ \n"
-             extraido
-             temp-tail
-             real-tail
-             real-tail)
-    (if (null? temp-tail)
-        (FUNC graf sub-lista '());soh roda
-        (cond
-          [(symbol=? (first temp-tail) '|;|)
-           (executePV graf sub-lista real-tail #t)]
-          [(symbol=? (first temp-tail) 'U)
-           (executeU graf sub-lista real-tail #t)]
-          [(symbol=? (first temp-tail) '*)
-           (execute* graf sub-lista real-tail #t)]
-          [else (if (FUNC graf (first extraido) '())
-                    #t
-                    #f)]
+)
+  (define encontra-PV
+    (lambda (sym-list)
+      (define retorno (filter not-void? (encontra-PV-void sym-list)))
+      (if (boolean? (last retorno))
+          (begin
+            (remove #t retorno)
+            (list retorno (+ (length retorno) 2 ))
+            )
+          (list retorno 0)
           )
-        )
+      )
     )
-  )
+      
 
-(define executeLetra
-  (lambda(graf lista tail)
-    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
-             "EXECUTE LETRA \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
-             (grafo-vetor-arestas graf)
-             (vector-ref (grafo-no-atual graf)0)
-             lista
-             tail)
-    (define label (first lista))
-    ;(define comando (second lista))
-    (if (null? (cdr lista));caso nao tenha proximo comando
-        (executa-atomico graf label tail)
-        (cond
-          [(symbol=? (second lista) '|;|)(executePV graf (list label) (list-tail lista 2) #f)]
-          [(symbol=? (second lista) 'U)(executeU graf (list label) (list-tail lista 2) #f)]
-          [(symbol=? (second lista) '*)(execute* graf (list label) (list-tail lista 2) #f)]
-          [else (if (or-map label graf tail FUNC)
-                    #t
-                    #f)]
-          )
-        )
-    )
-  )
-
-(define FUNC
-  (lambda (graf lista tail)
-    (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
-             "CHAMADA DE FUNC \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
-             (grafo-vetor-arestas graf)
-             (vector-ref (grafo-no-atual graf) 0)
-             lista
-             tail)
-    (if (null? lista) ;caso FUNC tenha a  instrucao sendo uma lista '() ,quer dizer que chegou no final,entao reetorna #t
-        #t
-        (if (symbol=? (car lista) '|(| )
-            (executeParentese graf lista tail);aqui executaremos tudo caso tenha ( na frente
-            (executeLetra graf lista tail)
-            ) 
-        )
+  (define encontra-U-void
+    (lambda (sym-list)
     
-    )
-  )
+      (let ([counter 0]
+            [achado #f]
+            [bufferzinho '()]
+            [buffer '()])
+        (begin
+          (map (lambda (s-atual)
+                 (if achado
+                     (void)
+                     (cond
+                       [(symbol=? s-atual '|(| )
+                        (if (positive? counter) ;em ambos os casos (ser >0 ou nao) iremos incrementar
+                            (begin
+                              (set! bufferzinho (append bufferzinho (list s-atual)))
+                              (set! counter (+ counter 1)))
+                            (set! counter (+ counter 1)))
+                        ]
+                       [(symbol=? s-atual '|)| )
+                        (set! counter (- counter 1))
+                        (if (positive? counter) ;se 0 iremos fazer a  funcao, e nunca vai ser 0 sem ter tirado um ( antes, a nao  ser que apenas nao tenha
+                            (set! bufferzinho (append bufferzinho (list s-atual)))
+                            buffer)]
+                       [(and (symbol=? s-atual 'U ) (zero? counter))
+                        (begin
+                          (set! buffer (append buffer (list bufferzinho)))
+                          (set! bufferzinho (null) ))
+                        ]
+                       [(and (symbol=? s-atual '|;| ) (zero? counter))
+                        (begin
+                          (set! achado #t )
+                          (set! buffer(append buffer (list bufferzinho)))
+                          (set! bufferzinho (null)))
 
-;------------Preparacao----------------------
-(define e-programa(st-to-sy pdl-string))
-(define e-grafo (build-grafo grafo-entrada))
-;------------Preparacao----------------------
-(define run
-  (lambda ()
-    (writeln (FUNC e-grafo e-programa '()))
-    (nao-percorridas e-grafo)
-    )
-  )
+                        ]
+                       [else (set! bufferzinho (append bufferzinho (list s-atual)))]
+                       )
+                     )
+                 )
+               (list-tail sym-list 1)
+  
+               )
+          (if (equal? achado true)
+              (void)
+              (set! buffer(append buffer (bufferzinho)))
+              )
+          )
+        )
+      ))
 
-(run)
+  (define encontra-U
+    (lambda (sym-list)
+      (define retorno (encontra-PV sym-list))
+      (define divide (encontra-U-void (first retorno)))
+      (append divide (second retorno))
+      ))
+  ;----------------------------------------------------------------Aqui serah  o corpo principal da resolucao------------------------------------------------------
+  (define executePV ;executa  ; ,ou seja se o proximo comando era ; este serah tratado
+    (lambda (graf lista tail parentese)
+      (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+               "EXECUTE PV \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+               (grafo-vetor-arestas graf)
+               (vector-ref (grafo-no-atual graf)0)
+               lista
+               tail)
+      ;(define lista-sem-comando (list-tail lista 1))
+      (if parentese
+          (if(and (FUNC graf lista tail) (FUNC graf tail '()))
+             #t
+             #f)
+          (if(FUNC graf lista tail)
+             #t
+             #f))
+      )
+    )
+
+  (define executeU ;executa  U ,ou seja se o proximo comando era U este serah tratado
+    (lambda (graf lista tail parentese)
+      (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+               "EXECUTE U \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+               (grafo-vetor-arestas graf)
+               (vector-ref (grafo-no-atual graf)0)
+               lista
+               tail)
+      ;(define lista-sem-comando (list-tail lista 1))  
+      (define lista-de-programas (encontra-U tail))
+      (if (ormap (lambda (prog-atual)
+                   (FUNC graf prog-atual tail))
+                 lista-de-programas)
+          (if (parentese)
+              (FUNC graf tail '())
+              #t)
+          #f
+          )
+      )
+    )
+
+  (define execute* ;executa *  ,ou seja se o proximo comando era * este serah tratado
+    (lambda(graf lista tail parentese)
+      (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+               "EXECUTE * \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+               (grafo-vetor-arestas graf)
+               (vector-ref (grafo-no-atual graf)0)
+               lista
+               tail)
+      (define command (list-ref lista 0))
+      (if (execute*-rec graf lista tail command '() 50 0); 50 foi o valor  maximo de execussoes seguidas do que ta marcado por * que serao feitas
+          (if (parentese)
+              (FUNC graf tail '())
+              #t)
+          #f
+          )
+      )
+    )
+
+  (define execute*-rec
+    (lambda (graf lista tail command buffer limite-rec counter) ;observe que  aquivemos como apenas se fosse uma lista,mas eh  obuffer que estasendo modificado pela funcao acima.
+      (if(cond 
+           [(symbol=? command '|;|)
+            (executePV graf lista tail)]
+           [(symbol=? command '|U|)
+            (executeU graf lista tail)]
+           [(symbol=? command '|| ) ;bem se nao tem proximo comando, nao tem tail
+            (FUNC graf lista '())])
+         #t 
+         (if (> limite-rec counter) ;limite de quantas repeticoes do que ta em volto por * seguidamente, ex: <list>* |Se executa <list>;<list>;...;<list> . o limite de <list>'s seguidos que testaremos  
+             (begin
+               (set! counter (+ counter 1))
+               (if (null? buffer) ;;aqui vamos aumentando quantas vezes sao executadas
+                   (set! buffer(append buffer lista ))
+                   (set! buffer(append buffer '(|;|) lista ))
+                   )
+               (execute*-rec graf buffer tail command buffer limite-rec counter))
+             #f ;se passar chegar a 50 retorna falso
+             )
+         )
+      )
+    )   
+
+  (define executa-atomico
+    (lambda (graf label tail)
+      (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+               "EXECUTE ATOMICO \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+               (grafo-vetor-arestas graf)
+               (vector-ref (grafo-no-atual graf)0)
+               label
+               tail)
+      (if(or-map label graf tail FUNC)
+         #t
+         #f)
+      )
+    )
+  
+  (define executeParentese
+    (lambda(graf lista tail)
+      (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+               "EXECUTE parentese \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+               (grafo-vetor-arestas graf)
+               (vector-ref (grafo-no-atual graf)0)
+               lista
+               tail)
+      ;as definicoes abaixo sao totalmente desncessessarias, apenas usadas como "apelidos"
+      (define extraido (extrair-ex lista)) ;lista : <sub-lista> , posicao-de-)
+      (define temp-tail (list-tail lista (+ (second extraido) 1)))
+      (define real-tail (list-tail temp-tail 1));aqui estaremos criando a tail sem o comando
+      (define sub-lista (first extraido))
+      (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+               "\n LISTAS \n Extraido: ~a \n temp-tail: ~a \n real-tail : ~a \n sub-lista : ~a \n _______________________________________________ \n"
+               extraido
+               temp-tail
+               real-tail
+               real-tail)
+      (if (null? temp-tail)
+          (FUNC graf sub-lista '());soh roda
+          (cond
+            [(symbol=? (first temp-tail) '|;|)
+             (executePV graf sub-lista real-tail #t)]
+            [(symbol=? (first temp-tail) 'U)
+             (executeU graf sub-lista real-tail #t)]
+            [(symbol=? (first temp-tail) '*)
+             (execute* graf sub-lista real-tail #t)]
+            [else (if (FUNC graf (first extraido) '())
+                      #t
+                      #f)]
+            )
+          )
+      )
+    )
+
+  (define executeLetra
+    (lambda(graf lista tail)
+      (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+               "EXECUTE LETRA \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+               (grafo-vetor-arestas graf)
+               (vector-ref (grafo-no-atual graf)0)
+               lista
+               tail)
+      (define label (first lista))
+      ;(define comando (second lista))
+      (if (null? (cdr lista));caso nao tenha proximo comando
+          (executa-atomico graf label tail)
+          (cond
+            [(symbol=? (second lista) '|;|)(executePV graf (list label) (list-tail lista 2) #f)]
+            [(symbol=? (second lista) 'U)(executeU graf (list label) (list-tail lista 2) #f)]
+            [(symbol=? (second lista) '*)(execute* graf (list label) (list-tail lista 2) #f)]
+            [else (if (or-map label graf tail FUNC)
+                      #t
+                      #f)]
+            )
+          )
+      )
+    )
+
+  (define FUNC
+    (lambda (graf lista tail)
+      (fprintf (current-output-port) ;Caso contrario aqui imprimiremos onde  deu problema
+               "CHAMADA DE FUNC \n Grafo-arestas: ~a \n Grafo-no-atual : ~a \n Lista : ~a \n Tail : ~a\n _______________________________________________ \n"
+               (grafo-vetor-arestas graf)
+               (vector-ref (grafo-no-atual graf) 0)
+               lista
+               tail)
+      (if (null? lista) ;caso FUNC tenha a  instrucao sendo uma lista '() ,quer dizer que chegou no final,entao reetorna #t
+          #t
+          (if (symbol=? (car lista) '|(| )
+              (executeParentese graf lista tail);aqui executaremos tudo caso tenha ( na frente
+              (executeLetra graf lista tail)
+              ) 
+          )
+    
+      )
+    )
+
+  ;------------Preparacao----------------------
+  (define e-programa(st-to-sy pdl-string))
+  (define e-grafo (build-grafo grafo-entrada))
+  ;------------Preparacao----------------------
+  (define run
+    (lambda ()
+      (writeln (FUNC e-grafo e-programa '()))
+      (nao-percorridas e-grafo)
+      )
+    )
+
+  (run)
